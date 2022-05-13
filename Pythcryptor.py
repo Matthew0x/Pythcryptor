@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QApplication, QLineEdit, QWidget, QFormLayout, QListWidget, QComboBox, QLabel, QFrame, QDial, QColumnView
+from PySide6.QtWidgets import QApplication, QLineEdit, QWidget, QFormLayout, QListWidget, QComboBox, QLabel, QFrame, QDial, QColumnView, QVBoxLayout
 from PySide6.QtGui import QIntValidator, QDoubleValidator, QFont
 from PySide6.QtCore import Qt
 from functools import partial
@@ -28,6 +28,7 @@ class mainWindow(QWidget):
         self.encryptTypeLabel.setText(self.infoLabel)
         self.encryptTypeLabel.setAlignment(Qt.AlignCenter)
 
+        self.encryptComboBox.setFixedWidth(self.frameSize().toTuple()[0]/4)
         self.encryptComboBox.addItem("Null")
         self.encryptComboBox.addItem("Caesar")
 
@@ -50,9 +51,9 @@ class mainWindow(QWidget):
         # self.encryptComboBox.textActivated.connect(buildLambda)
 
         # This one works and was produced by PEP8 plugin... what the hell is going on with Python?
-        def buildLambda(): return self.buildChanges(
-            self.encryptComboBox.currentText(), self.currentCipher)
-        self.encryptComboBox.textActivated.connect(buildLambda)
+        # def buildLambda(): return self.buildChanges(
+        #     self.encryptComboBox.currentText(), self.currentCipher)
+        self.encryptComboBox.textActivated.connect(self.buildChanges)
 
         #e2 = QLineEdit()
         # e2.setValidator(QDoubleValidator(0.99,99.99,2))
@@ -68,9 +69,8 @@ class mainWindow(QWidget):
 
         self.setLayout(self.windowLayout)
 
-    def buildChanges(self, comboBoxSelection: str, currentCipher: str) -> None:
-        print(self, comboBoxSelection, currentCipher)
-        if comboBoxSelection == "Caesar" and currentCipher != comboBoxSelection:
+    def buildChanges(self) -> None:
+        if self.encryptComboBox.currentText() == "Caesar" and self.currentCipher != self.encryptComboBox.currentText():
             global dialValue  # global shiftDial = QDial() #ecs dee, the one liner global variable with initialization is not available. Prase Kek
             global shiftDial
             shiftDial = QDial()
@@ -81,22 +81,31 @@ class mainWindow(QWidget):
             shiftDial.setNotchTarget(True)
             shiftDial.setNotchesVisible(True)
             shiftDial.setWrapping(False)
+            shiftDial.setFixedWidth(self.frameSize().toTuple()[0]/4)
+            shiftDial.setFixedHeight(self.frameSize().toTuple()[0]/4)
 
-            dialValue = QLabel("0")
+            dialValue = QLabel()
+            dialValue.setText("0")
+            dialValue.setAlignment(Qt.AlignCenter)
+
+            dialValue.setFixedWidth(self.frameSize().toTuple()[0]/4)
+
             dialValue.setFrameStyle(QFrame.Box | QFrame.Raised)
 
-            self.windowLayout.addRow(dialValue, shiftDial)
-            # if shiftDial.valueChanged():
-            dialValue = shiftDial.value()
-            self.trackChanges("Caesar")
-            print(currentCipher)
-            print(self.currentCipher)
+            layoutCaesar = QVBoxLayout()
+            layoutCaesar.addWidget(shiftDial)
+            layoutCaesar.addWidget(dialValue)
+            self.windowLayout.addRow(layoutCaesar)
 
-    def trackChanges(self, currentCipher):
-        self.currentCipher = currentCipher
-        print(self)
-        print(currentCipher)
-        print(self.currentCipher)
+            def showValue(): return dialValue.setText(str(shiftDial.value()))
+            shiftDial.valueChanged.connect(showValue)
+
+            self.currentCipher = self.encryptComboBox.currentText()
+        self.trackChanges()
+
+    def trackChanges(self):
+        if(self.encryptComboBox.currentText() != self.currentCipher):
+            self.windowLayout.removeRow(self.windowLayout.rowCount())
 
 
 def render():
