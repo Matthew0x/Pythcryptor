@@ -31,6 +31,8 @@ I decided to use PySide instead of PyQt. It looked pretty good to me, so I finis
 
 PERHAPS ANOTHER DAY.
 
+![Preview](Screenshot.png)
+
 ### This app is basically a primitive prototype, nothing fancy (it's trash rn).
 
 Posted it under public, because why not. I will work on it and implement/merge my ideas for a book about cryptography and an app.
