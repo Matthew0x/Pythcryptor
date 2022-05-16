@@ -1,3 +1,4 @@
+# This repository is synced
 # Pythcryptor
 
 Program for quick encryption and decryption of simple data. My first GUI program not written with C#.
