@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QApplication, QStyleFactory, QLineEdit, QWidget, QFormLayout, QListWidget, QComboBox, QLabel, QFrame, QDial, QColumnView, QVBoxLayout, QHBoxLayout, QInputDialog, QBoxLayout, QGridLayout, QSpacerItem, QSizePolicy
+from PySide6.QtWidgets import QApplication, QStyleFactory, QLineEdit, QTextEdit, QWidget, QFormLayout, QListWidget, QComboBox, QLabel, QFrame, QDial, QColumnView, QVBoxLayout, QHBoxLayout, QInputDialog, QBoxLayout, QGridLayout, QSpacerItem, QSizePolicy
 from PySide6.QtGui import QIntValidator, QDoubleValidator, QFont
 from PySide6.QtCore import Qt
 from functools import partial
@@ -125,7 +125,6 @@ class mainWindow(QWidget):
 
                         # No idea what it's supposed to do. I tried playing around with dynamically expanding elements.
                         # So far it turns out to be stupidly messed up. I will write own listener for this.
-                        # Learning about how Qt handles this is a waste of my time.
                         # shiftDial.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
                         dialValue = QLabel()
@@ -144,14 +143,25 @@ class mainWindow(QWidget):
                         layoutDials.addWidget(dialValue)
 
                         # Caesar DATA INPUT/OUTPUT
-                        messageInput = QLineEdit("Your message")
+                        messageInput = QTextEdit("Your message")
                         messageInput.setFixedWidth(self.frameSize().toTuple()[0]*2/4)
                         messageInput.setFixedHeight(self.frameSize().toTuple()[0]*1/4)
+                        messageInput.setFrameStyle(QFrame.Panel | QFrame.Raised)
+                        messageInput.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
 
-                        messageOutput = QLabel("Your encrypted message")
-                        messageOutput.setFrameStyle(QFrame.Box | QFrame.Raised)
+                        # For turning off scrollbars
+                        # self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+                        # self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+                        # messageInput.setClearButtonEnabled(True)
+
+                        messageOutput = QTextEdit("Your encrypted message")
                         messageOutput.setFixedWidth(self.frameSize().toTuple()[0]*2/4)
                         messageOutput.setFixedHeight(self.frameSize().toTuple()[0]*1/4)
+                        messageOutput.setFrameStyle(QFrame.Panel | QFrame.Raised)
+                        messageOutput.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+
+                        # For Labels
+                        # messageOutput.setTextInteractionFlags(Qt.TextSelectableByMouse | Qt.TextSelectableByKeyboard)
 
                         layoutData = QBoxLayout(QBoxLayout.TopToBottom, parent = None)
                         # layoutData.setStretch(1, 1)
@@ -191,15 +201,16 @@ class mainWindow(QWidget):
                         shiftDial.valueChanged.connect(showValue)
                         def showMessage(): 
                                 array = ""
-                                for index in range(len(messageInput.text())):
-                                        char = messageInput.text()[index]
+                                for index in range(len(messageInput.toPlainText())):
+                                        char = messageInput.toPlainText()[index]
                                         if (ord(char) >=65 and ord(char) <=90):
-                                                array = array + chr((ord(char) + shiftDial.value() - 67) % 26 + 65)
+                                                array = array + chr((ord(char) + shiftDial.value() - 65) % 26 + 65)
                                         elif (ord(char) >=97 and ord(char) <=122):
                                                 array = array + chr((ord(char) + shiftDial.value() - 97) % 26 + 97)
                                         else:
                                                 array = array + char
                                 messageOutput.setText(array)
+                                messageOutput.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
                         shiftDial.valueChanged.connect(showMessage)
                         messageInput.textChanged.connect(showMessage)
 
