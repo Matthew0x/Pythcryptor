@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QApplication, QStyleFactory, QLineEdit, QTextEdit, QWidget, QFormLayout, QListWidget, QComboBox, QLabel, QFrame, QDial, QColumnView, QVBoxLayout, QHBoxLayout, QInputDialog, QBoxLayout, QGridLayout, QSpacerItem, QSizePolicy
-from PySide6.QtGui import QIntValidator, QDoubleValidator, QFont
+from PySide6.QtGui import QIntValidator, QDoubleValidator, QFont, QTextCursor, QCursor
 from PySide6.QtCore import Qt
 from functools import partial
 import sys, os
@@ -114,7 +114,7 @@ class mainWindow(QWidget):
                         shiftDial = QDial()
                         shiftDial.setSingleStep(1)
                         shiftDial.setPageStep(1)
-                        shiftDial.setMinimum(1)
+                        shiftDial.setMinimum(0)
                         shiftDial.setMaximum(26)
                         shiftDial.setTracking(1)
                         shiftDial.setNotchTarget(True)
@@ -160,6 +160,21 @@ class mainWindow(QWidget):
                         messageOutput.setFrameStyle(QFrame.Panel | QFrame.Raised)
                         messageOutput.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
 
+                        cipherInfo = QTextEdit(
+                                                """Caesar cipher is also known as shift cipher.
+                                                ...
+                                                It is a type of cipher that belongs into substition ciphers category.
+                                                Caesar cipher replaces each letter of the encrypted word with another letter, shifted by a specified value
+                                                in modulo space of alphabet. In different words, the alphabet has 26 letters, hence the modulo space is 26, with shift values
+                                                varying from 0 to 26"""
+                                                )
+                        cipherInfo.setFixedWidth(self.frameSize().toTuple()[0]*3/4)
+                        cipherInfo.setFixedHeight(self.frameSize().toTuple()[0]*1.5/4)
+                        cipherInfo.setFrameStyle(QFrame.Panel | QFrame.Raised)
+                        cipherInfo.setAlignment(Qt.AlignJustify)
+                        cipherInfo.setTextInteractionFlags(Qt.NoTextInteraction)
+                        #cipherInfo.setLineWrapMode(QTextEdit.NoWrap)
+
                         # For Labels
                         # messageOutput.setTextInteractionFlags(Qt.TextSelectableByMouse | Qt.TextSelectableByKeyboard)
 
@@ -194,6 +209,8 @@ class mainWindow(QWidget):
                         gridCaesar.addWidget(dialValue, 1, 0, 1, 1, Qt.AlignCenter)
                         gridCaesar.addWidget(messageInput, 0, 1, 1, 3, Qt.AlignCenter)
                         gridCaesar.addWidget(messageOutput, 2, 1, 1, 3, Qt.AlignCenter)
+                        gridCaesar.addWidget(self.buildSpacer(self.frameSize().toTuple()[0]*1/8, self.frameSize().toTuple()[0]*1/16), 3, 0, 1, 1, Qt.AlignCenter)
+                        gridCaesar.addWidget(cipherInfo, 4, 0, 1, 4, Qt.AlignCenter)
                         self.windowLayout.addRow(gridCaesar)
 
                         # Caesar EVENT LISTENERS
@@ -211,15 +228,33 @@ class mainWindow(QWidget):
                                                 array = array + char
                                 messageOutput.setText(array)
                                 messageOutput.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+                                self.changeAlignment(messageOutput, Qt.AlignCenter)
                         shiftDial.valueChanged.connect(showMessage)
                         messageInput.textChanged.connect(showMessage)
+
+        def buildSpacer(self, frameWidth, frameHeight):
+                spacerLabel = QLabel()
+                spacerLabel.setFixedWidth(frameWidth)
+                spacerLabel.setFixedHeight(frameHeight)
+                spacerLabel.setFrameStyle(QFrame.NoFrame)
+                spacerLabel.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+                return spacerLabel
 
         def trackChanges(self, currentCipher:str) -> None:
                 if(currentCipher != self.previousCipher and currentCipher != "Null"):
                         if (self.windowLayout.rowCount() > 3): 
                                 self.windowLayout.removeRow(self.windowLayout.rowCount()-1)
                 self.previousCipher = currentCipher
-
+        
+        def changeAlignment(self, textEdit:QTextEdit, textAlignment:Qt.Alignment):
+                textEdit.moveCursor(QTextCursor.Start)
+                lastPosition = -1
+                currentPosition = textEdit.textCursor().position()
+                while lastPosition != currentPosition:
+                        textEdit.setAlignment(textAlignment)
+                        textEdit.moveCursor(QTextCursor.Down)
+                        lastPosition = currentPosition
+                        currentPosition = textEdit.textCursor().position()
 
 def render():
         sys.argv += ['--style', 'Material']
