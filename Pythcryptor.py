@@ -38,6 +38,23 @@ from PySide6.QtCore import Qt
 from functools import partial
 import sys, os
 
+# * Global functions
+
+# * Modifies text by operating on a copy
+def changeAlignment(textEdit: QTextEdit, textAlignment: Qt.Alignment):
+    tempTextEdit = textEdit
+    tempTextEdit.moveCursor(QTextCursor.Start)
+    lastPosition = -1
+    currentPosition = tempTextEdit.textCursor().position()
+    while lastPosition != currentPosition:
+        tempTextEdit.setAlignment(textAlignment)
+        tempTextEdit.moveCursor(QTextCursor.Down)
+        lastPosition = currentPosition
+        currentPosition = tempTextEdit.textCursor().position()
+    textEdit = tempTextEdit
+    del tempTextEdit
+    textEdit.moveCursor(QTextCursor.End)
+
 
 class MainWindow(QWidget):
     programName: str = "Pythcryptor"
@@ -147,12 +164,19 @@ class MainWindow(QWidget):
             self.changeWindow("Monoalphabetic")
         if self.cipherComboBox.currentText() == "Caesar" and self.previousCipher != self.cipherComboBox.currentText():
             self.changeWindow("Caesar")
-            # Yes, this is pretty stupid, but I don't know how to fix it for now
+            # Yes, global is pretty stupid, but I don't know how to fix it for now
             global caesarWindow
             caesarWindow = Caesar(self)
             caesarWindow.shiftDial.valueChanged.connect(caesarWindow.caesarShowValue)  # type: ignore
             caesarWindow.shiftDial.valueChanged.connect(caesarWindow.caesarShowMessage)  # type: ignore
             caesarWindow.messageInput.textChanged.connect(caesarWindow.caesarShowMessage)  # type: ignore
+
+            def messageInputFormat():
+                caesarWindow.messageInput.textChanged.disconnect(messageInputFormat),  # type: ignore
+                changeAlignment(caesarWindow.messageInput, Qt.AlignCenter),  # type: ignore
+                caesarWindow.messageInput.textChanged.connect(messageInputFormat)  # type: ignore
+
+            caesarWindow.messageInput.textChanged.connect(messageInputFormat)  # type: ignore
 
     def buildSpacer(self, frameWidth, frameHeight):
         spacerLabel = QLabel()
@@ -167,16 +191,6 @@ class MainWindow(QWidget):
             if self.windowLayout.rowCount() > 3:
                 self.windowLayout.removeRow(self.windowLayout.rowCount() - 1)
         self.previousCipher = currentCipher
-
-    def changeAlignment(self, textEdit: QTextEdit, textAlignment: Qt.Alignment):
-        textEdit.moveCursor(QTextCursor.Start)
-        lastPosition = -1
-        currentPosition = textEdit.textCursor().position()
-        while lastPosition != currentPosition:
-            textEdit.setAlignment(textAlignment)
-            textEdit.moveCursor(QTextCursor.Down)
-            lastPosition = currentPosition
-            currentPosition = textEdit.textCursor().position()
 
 
 class Caesar:
@@ -233,6 +247,7 @@ class Caesar:
         self.messageInput.setFixedHeight(int(window.frameSize().width() * 1 / 4))
         self.messageInput.setFrameStyle(QFrame.Panel | QFrame.Raised)  # type: ignore
         self.messageInput.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)  # type: ignore
+        self.messageInput.setAcceptRichText(False)
 
         # For turning off scrollbars
         # window.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
@@ -244,6 +259,7 @@ class Caesar:
         self.messageOutput.setFixedHeight(int(window.frameSize().width() * 1 / 4))
         self.messageOutput.setFrameStyle(QFrame.Panel | QFrame.Raised)  # type: ignore
         self.messageOutput.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)  # type: ignore
+        self.messageOutput.setAcceptRichText(False)
 
         self.cipherInfo = QTextEdit(
             """Caesar cipher is also known as shift cipher.
@@ -327,8 +343,7 @@ class Caesar:
             else:
                 array = array + char
         self.messageOutput.setText(array)
-        self.messageOutput.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)  # type: ignore
-        MainWindow.changeAlignment(MainWindow, self.messageOutput, Qt.AlignCenter)  # type: ignore
+        changeAlignment(self.messageOutput, Qt.AlignCenter)  # type: ignore
 
 
 def render():

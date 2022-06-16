@@ -5,11 +5,22 @@ Program for quick encryption and decryption of simple data. My first GUI program
 
 It is written using PySide6, manually, without QCreator or QtQuick.
 
+## Version 1.1
+
+- refactored code
+- added class encapsulation
+- added messageInput auto-formatting feature
+
+## TODO
+
+- new ciphers
+- HTML stylesheets
+- read from/to file
+- I/O & cache clear button
+
 ## Purpose
 
-I plan on implementing some basic ciphers, at least the ones I got to know during my studies.
-
-Basically a project merging my minor idea of a cryptography notebook with a handy implementation for my own use.
+You provide some text you want, then parse it into an encrypted version.
 
 ## Preview
 
