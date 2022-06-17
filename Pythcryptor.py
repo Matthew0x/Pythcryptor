@@ -6,39 +6,78 @@
 # self.filmButton.clicked.connect(lambda: openWebpage("http://some.web.adress"))
 # Remember to put signal listeners in persistent objects
 
+# Obtaining window size
+# self.shiftDial.setFixedWidth(int(window.frameSize().width() * 1 / 4))
+# self.shiftDial.setFixedHeight(int(window.frameSize().width() * 1 / 4))
+
 from PySide6.QtWidgets import (
     QApplication,
-    QStyleFactory,
-    QLineEdit,
+    QDial,
+    QFrame,
+    QGridLayout,
+    QLabel,
+    QLayout,
+    QSizePolicy,
     QTextEdit,
     QWidget,
     QFormLayout,
-    QListWidget,
     QComboBox,
-    QLabel,
-    QFrame,
-    QDial,
-    QColumnView,
-    QVBoxLayout,
-    QHBoxLayout,
-    QInputDialog,
     QBoxLayout,
-    QGridLayout,
-    QSpacerItem,
-    QSizePolicy,
 )
 from PySide6.QtGui import (
-    QIntValidator,
-    QDoubleValidator,
+    QBrush,
+    QColor,
+    QConicalGradient,
+    QCursor,
     QFont,
+    QFontDatabase,
+    QGradient,
+    QIcon,
+    QImage,
+    QKeySequence,
+    QLinearGradient,
+    QPainter,
+    QPalette,
+    QPixmap,
+    QRadialGradient,
+    QTransform,
     QTextCursor,
     QCursor,
 )
-from PySide6.QtCore import Qt
+from PySide6.QtCore import (
+    QCoreApplication,
+    QDate,
+    QDateTime,
+    QLocale,
+    QMetaObject,
+    QObject,
+    QPoint,
+    QRect,
+    QSize,
+    QTime,
+    QUrl,
+    Qt,
+)
 from functools import partial
 import sys, os
 
 # * Global functions
+
+# *Yada yada, yes I found it on the internet
+def getRoman(number):
+    num = [1, 4, 5, 9, 10, 40, 50, 90, 100, 400, 500, 900, 1000]
+    sym = ["I", "IV", "V", "IX", "X", "XL", "L", "XC", "C", "CD", "D", "CM", "M"]
+    i = 12
+    roman = ""
+    while number:
+        div = number // num[i]
+        number %= num[i]
+        while div:
+            roman += sym[i]
+            div -= 1
+        i -= 1
+    return roman
+
 
 # * Modifies text by operating on a copy
 def changeAlignment(textEdit: QTextEdit, textAlignment: Qt.Alignment):
@@ -56,6 +95,11 @@ def changeAlignment(textEdit: QTextEdit, textAlignment: Qt.Alignment):
     textEdit.moveCursor(QTextCursor.End)
 
 
+sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+sizePolicy.setHorizontalStretch(0)
+sizePolicy.setVerticalStretch(0)
+
+
 class MainWindow(QWidget):
     programName: str = "Pythcryptor"
     welcomeLabel: str = "Welcome to Pythcryptor\n\n"
@@ -68,7 +112,9 @@ class MainWindow(QWidget):
         self.spacerLabel = QLabel()
         self.cipherComboBox = QComboBox()
         self.windowLayout = QFormLayout()
+        self.setSizePolicy(sizePolicy)
         self.setWindowTitle(self.programName)
+        sizePolicy.setHeightForWidth(self.sizePolicy().hasHeightForWidth())
         self.setFixedSize(self.defaultWindowSize[0], self.defaultWindowSize[1])
 
         # The problem here is that the app runs QStyles rather than default CSS. Using own CSS will overwrite the old Style and you need to declare full CSS or the app looks like crap.
@@ -92,7 +138,7 @@ class MainWindow(QWidget):
         self.infoLabel.setText(self.welcomeLabel)
         self.infoLabel.setAlignment(Qt.AlignCenter)  # type: ignore
 
-        self.cipherComboBox.setFixedWidth(int(self.frameSize().width() * 2 / 4))
+        self.cipherComboBox.setFixedWidth(200)
         self.cipherComboBox.addItem("Monoalphabetic")
         self.cipherComboBox.addItem("Caesar")
 
@@ -184,6 +230,8 @@ class MainWindow(QWidget):
         spacerLabel.setFixedHeight(frameHeight)
         spacerLabel.setFrameStyle(QFrame.NoFrame)  # type: ignore
         spacerLabel.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)  # type: ignore
+        sizePolicy.setHeightForWidth(spacerLabel.sizePolicy().hasHeightForWidth())
+        spacerLabel.setSizePolicy(sizePolicy)
         return spacerLabel
 
     def changeWindow(self, currentCipher: str) -> None:
@@ -206,10 +254,17 @@ class Caesar:
         self.shiftDial.setMaximum(26)
         self.shiftDial.setTracking(True)
         self.shiftDial.setNotchTarget(True)
-        self.shiftDial.setNotchesVisible(True)
+        self.shiftDial.setNotchesVisible(False)
         self.shiftDial.setWrapping(False)
-        self.shiftDial.setFixedWidth(int(window.frameSize().width() * 1 / 4))
-        self.shiftDial.setFixedHeight(int(window.frameSize().width() * 1 / 4))
+        self.shiftDial.setFixedWidth(100)
+        self.shiftDial.setFixedHeight(100)
+        sizePolicy.setHeightForWidth(self.shiftDial.sizePolicy().hasHeightForWidth())
+        self.shiftDial.setSizePolicy(sizePolicy)
+        self.shiftDial.setStyleSheet(
+            "background-color: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.8, fx:0.5, fy:0.5, stop:0.2 rgba(162, 165, 168, 25), stop:1 rgba(211, 211, 211, 250));\n"
+            "border-radius: 20px;"
+        )
+        #
 
         # No idea what it's supposed to do. I tried playing around with dynamically expanding elements.
         # So far it turns out to be stupidly messed up. I will write own listener for this.
@@ -219,8 +274,8 @@ class Caesar:
         self.valueLabel = QLabel()
         self.valueLabel.setText("0")
         self.valueLabel.setAlignment(Qt.AlignCenter)  # type: ignore
-        self.valueLabel.setFixedWidth(int(self.shiftDial.width() * 1 / 2))
-        self.valueLabel.setFixedHeight(int(self.shiftDial.height() * 1 / 4))
+        self.valueLabel.setFixedWidth(50)
+        self.valueLabel.setFixedHeight(25)
         print(
             "buildChanges says:",
             "\n\tshiftDial.height(): ",
@@ -233,104 +288,105 @@ class Caesar:
             self.valueLabel.width(),
         )
         self.valueLabel.setFrameStyle(QFrame.Box | QFrame.Raised)  # type: ignore
-        # valueLabel.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-
-        self.layoutDials = QBoxLayout(QBoxLayout.TopToBottom, parent=None)
-        # Same. Related to layout/widget stretching/expanding. Makes 0 difference.
-        # layoutDials.setStretch(1, 1)
-        self.layoutDials.addWidget(self.shiftDial)
-        self.layoutDials.addWidget(self.valueLabel)
+        sizePolicy.setHeightForWidth(self.valueLabel.sizePolicy().hasHeightForWidth())
+        self.valueLabel.setSizePolicy(sizePolicy)
 
         # Caesar DATA INPUT/OUTPUT
         self.messageInput = QTextEdit("Your message")
-        self.messageInput.setFixedWidth(int(window.frameSize().width() * 2 / 4))
-        self.messageInput.setFixedHeight(int(window.frameSize().width() * 1 / 4))
+        self.messageInput.setFixedWidth(200)
+        self.messageInput.setFixedHeight(100)
         self.messageInput.setFrameStyle(QFrame.Panel | QFrame.Raised)  # type: ignore
         self.messageInput.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)  # type: ignore
         self.messageInput.setAcceptRichText(False)
-
-        # For turning off scrollbars
-        # window.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        # window.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        # messageInput.setClearButtonEnabled(True)
+        sizePolicy.setHeightForWidth(self.messageInput.sizePolicy().hasHeightForWidth())
+        self.messageInput.setSizePolicy(sizePolicy)
+        self.messageInput.setStyleSheet(
+            "background-color: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.8, fx:0.5, fy:0.5, stop:0.2 rgba(162, 165, 168, 25), stop:1 rgba(211, 211, 211, 250));\n"
+            "border-radius: 20px;"
+        )
+        # self.messageInput.setClearButtonEnabled(True)
 
         self.messageOutput = QTextEdit("Your encrypted message")
-        self.messageOutput.setFixedWidth(int(window.frameSize().width() * 2 / 4))
-        self.messageOutput.setFixedHeight(int(window.frameSize().width() * 1 / 4))
+        self.messageOutput.setFixedWidth(200)
+        self.messageOutput.setFixedHeight(100)
         self.messageOutput.setFrameStyle(QFrame.Panel | QFrame.Raised)  # type: ignore
         self.messageOutput.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)  # type: ignore
         self.messageOutput.setAcceptRichText(False)
+        sizePolicy.setHeightForWidth(self.messageOutput.sizePolicy().hasHeightForWidth())
+        self.messageOutput.setSizePolicy(sizePolicy)
+        self.messageOutput.setStyleSheet(
+            "background-color: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.8, fx:0.5, fy:0.5, stop:0.2 rgba(162, 165, 168, 25), stop:1 rgba(211, 211, 211, 250));\n"
+            "border-radius: 20px;"
+        )
 
         self.cipherInfo = QTextEdit(
-            """Caesar cipher is also known as shift cipher.
-                                        ...
-                                        It is a type of cipher that belongs into substition ciphers category.
-                                        Caesar cipher replaces each letter of the encrypted word with another letter, shifted by a specified value
-                                        in modulo space of alphabet. In different words, the alphabet has 26 letters, hence the modulo space is 26, with shift values
-                                        varying from 0 to 26"""
+            """
+                Caesar cipher is also known as shift cipher.
+                ...
+                It is a type of cipher that belongs into substitution ciphers category.
+                Caesar cipher replaces each letter of the encrypted word with another letter, shifted by a specified value
+                in modulo space of alphabet. In different words, the alphabet has 26 letters, hence the modulo space is 26, with shift values
+                varying from 0 to 26
+            """
         )
-        self.cipherInfo.setFixedWidth(int(window.frameSize().width() * 3 / 4))
-        self.cipherInfo.setFixedHeight(int(window.frameSize().width() * 1.5 / 4))
+        self.cipherInfo.setFixedWidth(300)
+        self.cipherInfo.setFixedHeight(150)
         self.cipherInfo.setFrameStyle(QFrame.Panel | QFrame.Raised)  # type: ignore
         self.cipherInfo.setAlignment(Qt.AlignJustify)  # type: ignore
         self.cipherInfo.setTextInteractionFlags(Qt.NoTextInteraction)  # type: ignore
-        # cipherInfo.setLineWrapMode(QTextEdit.NoWrap)
-
-        # For Labels
-        # messageOutput.setTextInteractionFlags(Qt.TextSelectableByMouse | Qt.TextSelectableByKeyboard)
-
-        self.layoutData = QBoxLayout(QBoxLayout.TopToBottom, parent=None)
-        # layoutData.setStretch(1, 1)
-        self.layoutData.addWidget(self.messageInput)
-        self.layoutData.addWidget(self.messageOutput)
+        sizePolicy.setHeightForWidth(self.cipherInfo.sizePolicy().hasHeightForWidth())
+        self.cipherInfo.setSizePolicy(sizePolicy)
+        self.cipherInfo.setStyleSheet(
+            "background-color: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.8, fx:0.5, fy:0.5, stop:0.2 rgba(162, 165, 168, 25), stop:1 rgba(211, 211, 211, 250));\n"
+            "border-radius: 20px;"
+        )
 
         # Caesar MAIN LAYOUT
-        self.layoutCaesar = QBoxLayout(QBoxLayout.LeftToRight, parent=None)
-        self.layoutCaesar.addLayout(self.layoutDials)
-        self.layoutCaesar.addLayout(self.layoutData)
         self.gridCaesar = QGridLayout()
+        # self.gridCaesar.setGeometry(QRect(0, 0, 400, 600))
+        self.gridCaesar.setSpacing(0)
+        self.gridCaesar.setSizeConstraint(QLayout.SetFixedSize)
+        self.gridCaesar.setContentsMargins(40, 0, 140, 0)
 
         # ! Tried providing arguments with names, not to get lost in a series of 10 thousands numerical values.
         # ! Turns out that the function doesn't agree with me. It prefers the most primitive and stupid way instead.
-        # The issue it has is that I provide "too many" arguments, but the constructors disagree otherwise (shown below).
-        # gridCaesar.addWidget(self = self, arg__1 = shiftDial, row = 0, column = 0, rowSpan = 1, columnSpan = 1, alignment = Qt.AlignCenter)
-
-        # def addItem(self, arg__1:PySide6.QtWidgets.QLayoutItem) -> None: ...
-        # @overload
-        # def addItem(self, item:PySide6.QtWidgets.QLayoutItem, row:int, column:int, rowSpan:int=..., columnSpan:int=..., alignment:PySide6.QtCore.Qt.Alignment=...) -> None: ...
-        # @overload
-        # def addLayout(self, arg__1:PySide6.QtWidgets.QLayout, row:int, column:int, alignment:PySide6.QtCore.Qt.Alignment=...) -> None: ...
-        # @overload
-        # def addLayout(self, arg__1:PySide6.QtWidgets.QLayout, row:int, column:int, rowSpan:int, columnSpan:int, alignment:PySide6.QtCore.Qt.Alignment=...) -> None: ...
-        # @overload
-        # def addWidget(self, arg__1:PySide6.QtWidgets.QWidget, row:int, column:int, alignment:PySide6.QtCore.Qt.Alignment=...) -> None: ...
 
         # TODO: add aliases to arguments
+        # * BTW did you know about:
+        # Edit: Positional-only parameters are possible in Python 3.8 by a new function parameter syntax / to indicate that some function parameters must be specified positionally and cannot be used as keyword arguments.
+        # def somefunc(a, b, /):
+        #   print(a, b)
+        # * POV: you're a python programmer trying to use arguments with keywords
+        # addWidget(arg__1: QWidget, row: int, column: int, rowSpan: int, columnSpan: int, alignment: Alignment = ...)
+        # ?self.gridCaesar.addWidget(self.shiftDial, row=0, column=0, rowSpan=1, columnSpan=1, alignment=Qt.AlignCenter)  # type: ignore
+        # ?AttributeError: PySide6.QtWidgets.QGridLayout.addWidget(): unsupported keyword 'row'
+
+        # self.gridCaesar.addWidget(self.shiftDial, row=0, column=0, rowSpan=1, columnSpan=1, alignment=Qt.AlignCenter)  # type: ignore
         self.gridCaesar.addWidget(self.shiftDial, 0, 0, 1, 1, Qt.AlignCenter)  # type: ignore
         self.gridCaesar.addWidget(self.valueLabel, 1, 0, 1, 1, Qt.AlignCenter)  # type: ignore
-        self.gridCaesar.addWidget(self.messageInput, 0, 1, 1, 3, Qt.AlignCenter)  # type: ignore
-        self.gridCaesar.addWidget(self.messageOutput, 2, 1, 1, 3, Qt.AlignCenter)  # type: ignore
+        self.gridCaesar.addWidget(self.messageInput, 0, 1, 1, 1, Qt.AlignCenter)  # type: ignore
+        self.gridCaesar.addWidget(self.messageOutput, 4, 1, 1, 1, Qt.AlignCenter)  # type: ignore
         self.gridCaesar.addWidget(
             window.buildSpacer((int(window.frameSize().width() * 1 / 8)), (int(window.frameSize().width() * 1 / 16))),
-            3,
+            5,
             0,
             1,
             1,
             Qt.AlignCenter,  # type: ignore
         )
-        self.gridCaesar.addWidget(self.cipherInfo, 4, 0, 1, 4, Qt.AlignCenter)  # type: ignore
+        self.gridCaesar.addWidget(self.cipherInfo, 8, 0, 1, 1, Qt.AlignCenter)  # type: ignore
         window.windowLayout.addRow(self.gridCaesar)
 
     # Let's define some things
     def caesarShowValue(self) -> None:
-        print(
+        """print(
             "caesarShowValue says:",
             "\n\tvalueLabel.text(): ",
             self.valueLabel.text(),
             "\n\tshiftDial.value(): ",
             self.shiftDial.value(),
-        )
-        self.valueLabel.setText(str(self.shiftDial.value()))
+        )"""
+        self.valueLabel.setText(str(self.shiftDial.value()) + "-" + str(getRoman(self.shiftDial.value())))
 
     def caesarShowMessage(self) -> None:
         array = ""
