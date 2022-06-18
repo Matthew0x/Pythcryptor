@@ -23,6 +23,7 @@ from PySide6.QtWidgets import (
     QFormLayout,
     QComboBox,
     QBoxLayout,
+    QStyleFactory,
 )
 from PySide6.QtGui import (
     QBrush,
@@ -105,6 +106,13 @@ class MainWindow(QWidget):
     welcomeLabel: str = "Welcome to Pythcryptor\n\n"
     defaultWindowSize: list = [int(400), int(600)]
     previousCipher: str = "Null"
+    darkBackgroundColor: str = "background-color: rgba(46,33,27, 250)"
+    lightBackgroundGradient: str = "background-color: qradialgradient(spread:reflect, cx:0.5, cy:0.5, radius:0.8, fx:0.5, fy:0.5, stop:0.2 rgba(162, 165, 168, 50), stop:1 rgba(221, 221, 221, 250))"
+    lightBackgroundColor: str = "background-color: rgba(221, 221, 221, 250)"
+    lightSelectionBackgroundColor: str = "selection-background-color: lightGray;"
+    lightSelectionColor: str = "selection-background-color: black;"
+    lightHoverColor: str = "background: lightGray;"
+    borderRadius: str = "border-radius: 10px;"
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -141,6 +149,15 @@ class MainWindow(QWidget):
         self.cipherComboBox.setFixedWidth(200)
         self.cipherComboBox.addItem("Monoalphabetic")
         self.cipherComboBox.addItem("Caesar")
+        self.cipherComboBox.setStyleSheet(
+            f"{MainWindow.lightBackgroundColor};"
+            f"{MainWindow.lightSelectionBackgroundColor};"
+            f"{MainWindow.borderRadius};"
+            "QComboBox::hover"
+            "{"
+            f"{MainWindow.lightHoverColor};"
+            "}"
+        )
 
         self.windowLayout.setAlignment(Qt.AlignCenter)  # type: ignore
         self.windowLayout.addRow(self.infoLabel)
@@ -148,7 +165,7 @@ class MainWindow(QWidget):
         self.windowLayout.addRow(self.spacerLabel)
 
         # Doesn't work really. Produces an empty stylesheet. I wonder where I can find the stupid CSS template example...
-        test = self.styleSheet()
+        test = str(self.styleSheet())
         file = open(os.path.join(os.getcwd(), "stylesheet.css"), "w")
         file.write("Writing stylesheet: \n\n" + str(test))
         file.close()
@@ -242,15 +259,13 @@ class MainWindow(QWidget):
 
 
 class Caesar:
-    def __init__(self, window: MainWindow, parent=None):
-        # One liner global variable with initialization is not available. Top "Frog God"
-        # global shiftDial = QDial()
-
+    def __init__(self, window: MainWindow, parent=MainWindow):
         # Caesar CONTROLS
         self.shiftDial = QDial()
         self.shiftDial.setSingleStep(1)
         self.shiftDial.setPageStep(1)
-        self.shiftDial.setMinimum(0)
+        self.shiftDial.setValue(1)
+        self.shiftDial.setMinimum(1)
         self.shiftDial.setMaximum(26)
         self.shiftDial.setTracking(True)
         self.shiftDial.setNotchTarget(True)
@@ -261,18 +276,18 @@ class Caesar:
         sizePolicy.setHeightForWidth(self.shiftDial.sizePolicy().hasHeightForWidth())
         self.shiftDial.setSizePolicy(sizePolicy)
         self.shiftDial.setStyleSheet(
-            "background-color: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.8, fx:0.5, fy:0.5, stop:0.2 rgba(162, 165, 168, 25), stop:1 rgba(211, 211, 211, 250));\n"
-            "border-radius: 20px;"
+            f"{MainWindow.lightBackgroundColor};"
+            f"{MainWindow.lightSelectionBackgroundColor};"
+            f"{MainWindow.borderRadius};"
         )
         #
-
         # No idea what it's supposed to do. I tried playing around with dynamically expanding elements.
         # So far it turns out to be stupidly messed up. I will write own listener for this.
         # TODO: DYNAMICALLY EXPANDING WINDOWS
         # shiftDial.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         self.valueLabel = QLabel()
-        self.valueLabel.setText("0")
+        self.valueLabel.setText(str(self.shiftDial.value()))
         self.valueLabel.setAlignment(Qt.AlignCenter)  # type: ignore
         self.valueLabel.setFixedWidth(50)
         self.valueLabel.setFixedHeight(25)
@@ -301,8 +316,9 @@ class Caesar:
         sizePolicy.setHeightForWidth(self.messageInput.sizePolicy().hasHeightForWidth())
         self.messageInput.setSizePolicy(sizePolicy)
         self.messageInput.setStyleSheet(
-            "background-color: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.8, fx:0.5, fy:0.5, stop:0.2 rgba(162, 165, 168, 25), stop:1 rgba(211, 211, 211, 250));\n"
-            "border-radius: 20px;"
+            f"{MainWindow.lightBackgroundGradient};"
+            f"{MainWindow.lightSelectionBackgroundColor};"
+            f"{MainWindow.borderRadius};"
         )
         # self.messageInput.setClearButtonEnabled(True)
 
@@ -315,8 +331,9 @@ class Caesar:
         sizePolicy.setHeightForWidth(self.messageOutput.sizePolicy().hasHeightForWidth())
         self.messageOutput.setSizePolicy(sizePolicy)
         self.messageOutput.setStyleSheet(
-            "background-color: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.8, fx:0.5, fy:0.5, stop:0.2 rgba(162, 165, 168, 25), stop:1 rgba(211, 211, 211, 250));\n"
-            "border-radius: 20px;"
+            f"{MainWindow.lightBackgroundGradient};"
+            f"{MainWindow.lightSelectionBackgroundColor};"
+            f"{MainWindow.borderRadius};"
         )
 
         self.cipherInfo = QTextEdit(
@@ -337,8 +354,9 @@ class Caesar:
         sizePolicy.setHeightForWidth(self.cipherInfo.sizePolicy().hasHeightForWidth())
         self.cipherInfo.setSizePolicy(sizePolicy)
         self.cipherInfo.setStyleSheet(
-            "background-color: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.8, fx:0.5, fy:0.5, stop:0.2 rgba(162, 165, 168, 25), stop:1 rgba(211, 211, 211, 250));\n"
-            "border-radius: 20px;"
+            f"{MainWindow.lightBackgroundGradient};"
+            f"{MainWindow.lightSelectionBackgroundColor};"
+            f"{MainWindow.borderRadius};"
         )
 
         # Caesar MAIN LAYOUT
@@ -407,8 +425,12 @@ def render():
     app = QApplication(sys.argv)
 
     # Basically tried to utilize Qt styles. Like Macintosh, Windows (old ones), or new ones like Material etc.
-    # Nope, the program doesn't really care. Here we go Qt guides, so much useful once again... (still better than UWP lmao)
-    # app.setStyle(QStyleFactory.create("Material"))
+    # * OK, they seem to work, but only chosen ones? I found info that they are available basing on the OS, so what the 0ck is the point of having multiple themes,
+    # * if they are OS dependent and do not provide a universal GUI style?
+    # https://doc.qt.io/qt-6/qtquickcontrols2-styles.html
+
+    # app.setStyle(QStyleFactory.create("macOS"))
+    # app.setStyle(QStyleFactory.create("Fusion"))
 
     mainWindow = MainWindow()
     mainWindow.show()
