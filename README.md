@@ -6,7 +6,7 @@ Used for transforming text or (in the future) file inputs into encoded or cipher
 Planned
 
 ## Preview
-![Preview](Screenshot.png)
+![Preview](assets/Screenshot from 2024-06-17 01-14-59.png)
 
 ## License
 [GLPv3](https://www.qt.io/licensing/open-source-lgpl-obligations)
