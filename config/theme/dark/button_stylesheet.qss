@@ -1,0 +1,19 @@
+QPushButton {
+    color: #FFFFFF;
+    border-style: outset;
+    font-weight: normal;
+    font-size: 32px;
+    font-family: QTEurotype;
+    border-radius: 8px;
+}
+QPushButton::hover:!pressed { 
+    border-width: 4px;
+    border-radius: 10px;
+    border-color: #2752B8;
+}
+QPushButton::pressed { 
+    border-width: 4px;
+    border-radius: 10px;
+    border-color: #2349a3;
+    border-style: outset;
+}
